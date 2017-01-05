@@ -1,0 +1,40 @@
+; -*- mode:     Lisp -*- --------------------------------------------------- ;
+; File:         pc.zb
+; Description:  propositional calculus
+; Author:       Joachim H. Laubsch
+; Created:      15-Aug-91
+; Modified:     Fri Dec 22 11:06:02 1995 (Joachim H. Laubsch)
+; Language:     Lisp
+; Package:      USER
+; Status:       Experimental (Do Not Distribute) 
+; RCS $Header: $
+;
+; (c) Copyright 1991, Hewlett-Packard Company
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Revisions:
+; RCS $Log: $
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(:name "pc"
+ :domain-file "pc-dom"
+ :identifier-continue-chars
+ "$-_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
+
+(defrule Formula
+  := Propositional-variable
+  := Boolean-Expr
+  := ( "(" Formula ")" )
+  :build (progn Formula)
+  )
+
+(defrule Propositional-Variable
+  := Identifier)
+
+(defrule Boolean-Expr
+  := (Formula.1 Boolean-Op Formula.2)
+  :build (list Boolean-Op Formula.1 Formula.2)
+  )
+
+(defrule Boolean-Op
+  := "and"
+  := "or"
+  )

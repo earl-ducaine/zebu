@@ -1,0 +1,247 @@
+; -*- mode:     Lisp -*- --------------------------------------------------- ;
+; File:         BibTeX.zb
+; Description:  typed attribute-value language
+; Author:       Joachim H. Laubsch
+; Created:      13-Apr-92
+; Modified:     Fri Mar 12 18:46:57 1993 (Joachim H. Laubsch)
+; Language:     Lisp
+; Package:      CL-USER
+; Status:       Experimental (Do Not Distribute) 
+; RCS $Header: $
+;
+; (c) Copyright 1992, Hewlett-Packard Company
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Revisions:
+; RCS $Log: $
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(:name "BibTeX"
+ :package "CL-USER"
+ :identifier-continue-chars
+ "$-_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+ :identifier-start-chars
+ "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+ :lex-cats ((BibTeX-in-braces "{[^\\n}]*}"))
+ )
+
+;; domain
+(defstruct BibTex-key
+  -cat -label)
+
+(defstruct (bibtex-entry (:include kb-domain))
+  -key
+  -note
+  -annote
+  -month
+  -year
+  -pages)
+
+(defstruct (bibtex-article (:include bibtex-entry))
+  -author
+  -title
+  -journal
+  -volume
+  -number)
+
+(defstruct (bibtex-book (:include bibtex-entry))
+  -author
+  -editor
+  -title
+  -publisher
+  -volume
+  -series
+  -address
+  -edition)
+
+(defstruct (bibtex-inbook (:include bibtex-book))
+  -chapter
+  -booktitle)
+
+(defstruct (bibtex-proceedings (:include bibtex-entry))
+  -title
+  -editor
+  -publisher
+  -organization
+  -address)
+
+(defstruct (bibtex-inproceedings (:include bibtex-proceedings))
+  -author
+  -booktitle)
+
+(defstruct (bibtex-incollection (:include bibtex-entry))
+  -author
+  -title
+  -booktitle
+  -editor
+  -publisher
+  -organization
+  -address
+  -series)
+
+(defstruct (bibtex-techreport (:include bibtex-entry))
+  -author
+  -title
+  -number
+  -type
+  -institution
+  -school
+  -address)
+
+(defstruct (bibtex-phdthesis (:include bibtex-entry))
+  -author
+  -title
+  -type
+  -institution
+  -school
+  -address)
+
+(defstruct (bibtex-misc (:include bibtex-entry))
+  -author
+  -title
+  -booktitle)
+
+;; Productions
+(defrule BibTex-entry
+  :=    ( "@" BibTex-entry-type "{" BibTex-Key "," BibTex-slots "}" )
+  :build (apply
+	   (intern (concatenate 'string "MAKE-BIBTEX-"
+				(string-upcase BibTex-entry-type)))
+	   :-key BibTex-Key
+	   BibTex-slots))
+	    
+(defrule BibTex-entry-type
+  :=     "article"
+  :=     "book"
+  :=     "inbook"
+  :=     "proceedings"
+  :=     "inproceedings"
+  :=     "incollection"
+  :=     "techreport"
+  :=     "PhDThesis"
+  :=     "misc"
+  )
+
+(defrule BibTex-Key
+  :=  (Identifier.1 ":" Identifier.2)
+  :build (:type BibTex-key
+		:map ((Identifier.1 . :-cat)
+		      (Identifier.2 . :-label)))
+
+  := Identifier
+  :build (:type BibTex-key
+		:map ((Identifier . :-label)))
+
+  := String
+  :build (:type BibTex-key
+		:map ((String . :-label)))  
+  )
+
+(defrule BibTeX-field
+  := "key"
+  := "author"
+  := "title"
+  := "publisher"
+  := "year"
+  := "volume"
+  := "series"
+  := "address"
+  := "edition"
+  := "month"
+
+  := "note"
+  := "annote"
+  := "comment"       :build "note"
+
+  := "journal"
+  := "number"
+  := "page"
+
+  := "editor"
+  := "editors"       :build "editor"
+
+  := "organization"
+  := "institution"
+  := "booktitle"
+  := "pages"
+  := "type"
+  := "school"
+
+  := Identifier
+  :build (error "~S is not a defined BibTeX field" Identifier)
+  )
+
+(defrule BibTex-slot
+  := (BibTeX-field BibTeX-field-seperator BibTeX-value)
+  :build (list (intern (concatenate 'string "-"
+				    (string-upcase (string BibTeX-field)))
+		       (find-package "KEYWORD"))
+	       BibTeX-value)
+  )
+
+(defrule BibTeX-field-seperator
+  := "="
+  :=
+  )
+
+(defrule BibTex-slots
+  := ()
+
+  := BibTex-slot
+
+  := (BibTex-slot "," BibTex-slots)
+  :build (append BibTex-slot BibTex-slots)
+  )
+
+(defrule BibTeX-value
+ := Number
+ := String
+ := Identifier
+ := BibTeX-in-braces
+ :build (subseq BibTeX-in-braces 1 (1- (length BibTeX-in-braces)))
+ ;; strip off the braces	  
+ )
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                                    Test
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+#||
+(let ((*default-pathname-defaults* *ZEBU-TEST-DIRECTORY*)
+      (*load-verbose* t))
+  (zb:zebu-compile-file "BibTeX.zb"
+			:output-file (merge-pathnames
+				      "BibTeX.tab" *ZEBU-TEST-BINARY-DIRECTORY*)))
+
+(compile-file "BibTeX-domain")
+(let ((*default-pathname-defaults* *ZEBU-TEST-BINARY-DIRECTORY*))
+  (zb:zebu-load-file "BibTeX.tab"))
+
+(zb:read-parser 
+ "@INCOLLECTION{graphic_design:Tullis,
+   AUTHOR=   \"T.S. Tullis\",
+   TITLE=    \"Optimising the Usability of Computer-Generated Displays.\",
+   EDITOR=   \"M.D. Harrison and A. Monk (Ed.)\",
+   BOOKTITLE= \"People and Computers: Designing for Usability\",
+   PUBLISHER= \"Cambridge University Press\",
+   YEAR=     1986}"
+ :grammar (find-grammar "BibTeX"))
+
+(zb:read-parser 
+ "@INCOLLECTION{graphic_design:Tullis,
+   AUTHOR=   {T.S. Tullis},
+   TITLE=    \"Optimising the Usability of Computer-Generated Displays.\",
+   EDITOR=   \"M.D. Harrison and A. Monk (Ed.)\",
+   BOOKTITLE= \"People and Computers: Designing for Usability\",
+   PUBLISHER= {Cambridge University Press},
+   YEAR=     1986}"
+ :grammar (find-grammar "BibTeX"))
+
+(zb:read-parser 
+ "@TechReport{allen81a,
+key allen81a,
+author {ALLEN, J.F.},
+year 1981}"
+ :grammar (find-grammar "BibTeX"))
+
+||#
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                             End of BibTeX.zb
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
