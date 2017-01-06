@@ -6,7 +6,7 @@
 ; Modified:     Thu Mar  7 13:27:09 1996 (Joachim H. Laubsch)
 ; Language:     CL
 ; Package:      CL-USER
-; Status:       Experimental (Do Not Distribute) 
+; Status:       Experimental (Do Not Distribute)
 ; RCS $Header: $
 ;
 ; (c) Copyright 1992, Hewlett-Packard Company
@@ -34,22 +34,23 @@
 (provide "ZEBU-init")
 
 ;; edit the following form for your Lisp, and the directory where you keep Zebu
-(defparameter *ZEBU-directory*
-  (make-pathname 
-   :directory
-   (pathname-directory
-    #+CLISP   *load-truename*
-    #-ALLEGRO #+MCL (truename *loading-file-source-file*)
-    #-ALLEGRO #-MCL *load-pathname*
-    #+ALLEGRO (merge-pathnames *load-pathname*
-			       *default-pathname-defaults*)))
-  )
+(eval-when (:execute :load-toplevel :compile-toplevel)
+  (defparameter *ZEBU-directory*
+    (make-pathname
+     :directory
+     (pathname-directory
+      #+CLISP   *load-truename*
+      #-ALLEGRO #+MCL (truename *loading-file-source-file*)
+      #-ALLEGRO #-MCL *load-pathname*
+      #+ALLEGRO (merge-pathnames *load-pathname*
+				 *default-pathname-defaults*)))
+    ))
 
 ;----------------------------------------------------------------------------;
 ; *ZEBU-binary-directory*
 ;------------------------
 ; directory for compiled grammars and lisp files
-; 
+;
 (defparameter *ZEBU-binary-directory*
   (make-pathname :directory (append (pathname-directory *ZEBU-directory*)
 				    (list "binary"))))
@@ -86,9 +87,9 @@
 ;----------------------------------------------------------------------------;
 ; ZEBU package aka ZB
 ;-------------
-; 
+;
 (let ((*default-pathname-defaults* *ZEBU-directory*))
-  (load (merge-pathnames 
+  (load (merge-pathnames
 	 (make-pathname :name "zebu-package"
 			:type (car *load-source-pathname-types*)))))
 
@@ -103,13 +104,13 @@
 ; zb:zebu
 ;--------
 ; load the zebu parser runtime system
-; 
+;
 (defun zb:zebu (&key (compiled t))
   "Load the Zebu Parser"
   (let ((*default-pathname-defaults*
 	 (merge-pathnames
 	  (make-pathname
-	   :type (car (if compiled 
+	   :type (car (if compiled
 			  *load-binary-pathname-types*
 			*load-source-pathname-types*)))
 	  (if compiled
@@ -136,7 +137,7 @@
 ; zb:zebu-compiler
 ;-----------------
 ; load the Zebu Compiler
-; 
+;
 (defun zb:zebu-compiler (&key (compiled t) (verbose t))
   "Load the Zebu Compiler"
   (zb::zebu :compiled compiled)
@@ -144,7 +145,7 @@
   (let ((*default-pathname-defaults*
 	 (merge-pathnames
 	  (make-pathname
-	   :type (car (if compiled 
+	   :type (car (if compiled
 			  *load-binary-pathname-types*
 			*load-source-pathname-types*)))
 	  (if compiled
@@ -179,7 +180,7 @@
   (zb::zebu)
   (let ((path (merge-pathnames
 	       (make-pathname
-		:type (car (if compiled 
+		:type (car (if compiled
 			       *load-binary-pathname-types*
 			     *load-source-pathname-types*)))
 	       (if compiled
@@ -190,9 +191,9 @@
       (unless (member name *modules* :test #'string=)
 	(load (merge-pathnames (make-pathname :name name) path))))
     (values)))
-    
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; You may want to omit this and rather import only a subset of the 
+;; You may want to omit this and rather import only a subset of the
 ;; symbols or use package "ZEBU" in another package than the CL-USER
 ;; package.
 
@@ -221,7 +222,7 @@
   #+MCL
   (create-file *ZEBU-test-binary-directory* :if-exists nil)
   #+(and WINDOWS ACL3.0)
-  (create-directory *ZEBU-test-binary-directory*)  
+  (create-directory *ZEBU-test-binary-directory*)
   )
 
 (zebu-compile-file (merge-pathnames

@@ -6,7 +6,7 @@
 ; Modified:     Thu Dec 21 16:03:46 1995 (Joachim H. Laubsch)
 ; Language:     CL
 ; Package:      ZEBU
-; Status:       Experimental (Do Not Distribute) 
+; Status:       Experimental (Do Not Distribute)
 ; RCS $Header: $
 ;
 ; (c) Copyright 1992, Hewlett-Packard Company
@@ -66,7 +66,7 @@
 	(when (member (symbol-package struct-name)
 		      Lisp-pkgs)
 	  (warn "~s was chosen as the name of domain type, ~%but the symbol is already defined in the ~s"
-		struct-name (symbol-package struct-name)))	    
+		struct-name (symbol-package struct-name)))
 	(pprint f port)
 	(terpri port)
 	;; build the kb-hierarchy even if defstructs are used
@@ -155,7 +155,7 @@
 		       (when r (return r)))))))))
     (when (null *domain-types*)
       (return-from process-domain-definition nil))
-    ;; if there is a supertype in *domain-types* that is 
+    ;; if there is a supertype in *domain-types* that is
     ;; undefined, define it as a subtype of KB-domain
     (dolist (node *domain-types*)
       (let ((supertype (domain-type--supertype node)))
@@ -190,15 +190,15 @@
 ;----------------------------------------------------------------------------;
 ; Non-terminal-p
 ;---------------
-; 
+;
 (defun Non-terminal-p (constituent)
   (and (symbolp constituent) (not (assoc constituent *lex-cats*))))
 
 ;----------------------------------------------------------------------------;
 ; 1-constituent-production-p
 ;---------------------------
-; 
-; 
+;
+;
 (defun 1-constituent-production-p (syntax)
   (= 1 (count-if #'Non-terminal-p syntax))
   )
@@ -214,13 +214,13 @@
 
 (defun gen-printers (&aux type-prod-AL type-print-fn-AL user-def-types
 			  KB-sequence-print-fn-AL KB-sequence-prods
-			  (print-fn-argl (mapcar #'intern 
+			  (print-fn-argl (mapcar #'intern
 						 '("ITEM" "STREAM" "LEVEL"))))
   (flet ((memo (type val)
 	   (let ((bdg  (assoc type type-prod-AL)))
 	     (if (null bdg)
 		 (push (cons type (list val)) type-prod-AL)
-	       (push val (cdr bdg))))))	   
+	       (push val (cdr bdg))))))
     (maphash #'(lambda (key val) (declare (ignore val))
 		       (unless (or (member key '(:TOP KB-DOMAIN KB-SEQUENCE))
 				   (member (symbol-name key)
@@ -241,12 +241,12 @@
 		    (let ((nt (first-nt-constituent syntax)))
 		      (when (eq (car (infer-type-disj-of-expr nt))
 				'kb-sequence)
-			(memo 'kb-sequence (cons lhs nt))))))		  
+			(memo 'kb-sequence (cons lhs nt))))))
 	      (when (and semantics (feat-term-p semantics))
 		(let* ((type (feat-term--type semantics))
 		       (type-node (gethash type *domain-HT*))
 		       (slots (feat-term--slots semantics)))
-		  ;; warn about inconsistent use of the types	
+		  ;; warn about inconsistent use of the types
 		  (if (null type-node)
 		      (warn "Type: ~S is not defined in this domain" type)
 		    (dolist (slot slots)
@@ -304,9 +304,9 @@
 	      (if (null (cdr b))
 		  (pushnew b unused-bdgs)
 		(pushnew b good-bdgs)))
-	    (setf fun `(lambda (,@print-fn-argl 
+	    (setf fun `(lambda (,@print-fn-argl
 				,@(when good-bdgs `(&aux .,good-bdgs)))
-			  (declare (ignore 
+			  (declare (ignore
 				  ,@unused-bdgs
 				  .,(if (not good-bdgs)
 					print-fn-argl
@@ -324,7 +324,7 @@
 ;; gen-KB-sequence-printers
 ;;-------------------------
 ;; generate in-line format forms for KB-sequence first:
-;; KB-sequence-print-fn-AL: ((Constituent . <form(lhs)>)..); 
+;; KB-sequence-print-fn-AL: ((Constituent . <form(lhs)>)..);
 
 (defun gen-KB-sequence-printers (prods &aux Alist separator)
   (dolist (prod prods Alist)
@@ -352,7 +352,7 @@
       (let ((sep-ln-char (schar s (1- last-char-pos))))
 	(when (digit-char-p sep-ln-char)
 	  (let ((sep-length (- (char-int sep-ln-char) (char-int #\0))))
-	    (subseq s 
+	    (subseq s
 		    (- s-length sep-length 2)
 		    (- last-char-pos 1))))))))
 
@@ -360,7 +360,7 @@
 ; add-print-fn
 ;-------------
 ; add the print-function FN for the non-terminal CONSTITUENT to ALIST
-; 
+;
 (defun add-print-fn (CONSTITUENT FN ALIST)
   (let ((bdg (assoc CONSTITUENT ALIST)))
     (if (null bdg)
@@ -377,7 +377,7 @@
 ; clause
 ;-------
 ; <lambda-list syntax binding-list semantics>
-; 
+;
 (defstruct (clause)
   ll syntax bl semantics
   )
@@ -421,7 +421,7 @@
 ; return: (1) ((<test for print-case> <format stmt derived from syntax>) ..)
 ;         (2) a lambda-list binding the %u .. variables used to accessors
 ;             derived from the paths.
-(defconstant *vars-to-use* '("%R" "%S" "%T" "%U" "%V" "%W" "%X" "%Y" "%Z"))
+(defparameter *vars-to-use* '("%R" "%S" "%T" "%U" "%V" "%W" "%X" "%Y" "%Z"))
 
 (defun gen-clauses (clauses KB-sequence-print-fn-AL
 			    &aux (vars-to-use (mapcar #'intern *vars-to-use*))
@@ -441,8 +441,8 @@
 			  ,(apply #'concatenate 'string
 				  (make-format-string-list syntax))
 			  ,@(mapcan
-			     #'(lambda (const) 
-				 (unless (stringp const) 
+			     #'(lambda (const)
+				 (unless (stringp const)
 				   (let ((seq-fn-bdg
 					  (assoc
 					   const
@@ -466,7 +466,7 @@
 		(bdgs   (clause-bl eq-print)))
 	    (pushnew
 	     (if (null ll)
-		 (progn 
+		 (progn
 		   ;; (break  "sem: ~s" (clause-semantics eq-print))
 		   `(equal ,(intern "ITEM") ,(cons-avm
 					      (clause-semantics eq-print))))
@@ -513,7 +513,7 @@
 ; insert-clause
 ;--------------
 ; insert stronger clause at front
-; 
+;
 (defun insert-clause (clause clauses)
   (flet ((conjunction? (x) (and (consp x) (eq (car x) 'AND)))
 	 (conjuncts (x) (rest x))
@@ -548,7 +548,7 @@
 			  (cons clause clauses))
 		      (cons clause2 (insert-clause clause (rest clauses)))))
 	        (if (conjunction? ante1)
-		    ;; ((and p q) ..) : p  --> ((and p q) p ..) 
+		    ;; ((and p q) ..) : p  --> ((and p q) p ..)
 		    (if (typed-var? ante2)
 			(if (find-if #'(lambda (a) (weaker-typed? a ante2))
 				     (conjuncts ante1))
@@ -578,7 +578,7 @@
 			(and (stringp constituent1)
 			     (stringp constituent2)
 			     (string= constituent1 constituent2))))
-		a-syntax b-syntax)			
+		a-syntax b-syntax)
 	 ;; syntax is the same
 	 (let ((a-bdgs (clause-bl a)) (b-bdgs (clause-bl b)))
 	   ;; do all variables of the lambda-list have the same path?
@@ -591,7 +591,7 @@
 ;----------------------------------------------------------------------------;
 ; make-format-string-list
 ;------------------------
-; This converts a rhs of a grammar rule (SYNTAX) to a format string. 
+; This converts a rhs of a grammar rule (SYNTAX) to a format string.
 ; It tries to infer when spaces should be inserted based on the
 ; parameter *identifier-continue-chars*
 ; As a "rule of style" if a token has a space to its left (right) it should
@@ -626,7 +626,7 @@
 	      (push (escape-tilde const) Acc)
 	      (when (or sep?
 			;; there is a preceding blank, and not at end
-			(and (cdr syn-tl) 
+			(and (cdr syn-tl)
 			     preceding-blank?
 			     (parse-id/number? (second syn-tl))))
 		(push blank Acc)))
@@ -637,7 +637,7 @@
 	      (push a-tok Acc))
 	    (when (or sep?
 		      ;; there is a preceding blank, and not at end
-		      (and (cdr syn-tl) 
+		      (and (cdr syn-tl)
 			   preceding-blank?
 			   (parse-id/number? (second syn-tl))))
 	      (push blank Acc))))
@@ -737,7 +737,7 @@
 
 (defun white-space-p (char)
   (let ((w (or (get-grammar-options-key ':white-space)
-	       '(#\Space #\Newline #\Tab))))  
+	       '(#\Space #\Newline #\Tab))))
     (member (the character char) w :test #'char=)))
 
 (defun insert-seperator-before? (const)
@@ -826,8 +826,8 @@
 ;----------------------------------------------------------------------------;
 ; is-subtype-of
 ;--------------
-; 
-; 
+;
+;
 (defun is-subtype-of (a b)
   (or (eq a b)
       (let ((type-nd (gethash a *domain-HT*)))
@@ -840,7 +840,7 @@
 ; kb-subtypep
 ;------------
 ; disjunctive and conjunctive types are allowed
-; 
+;
 (defun kb-subtypep (a b)
   (if (consp a)
       (case (first a)
@@ -867,7 +867,7 @@
   (labels ((infer-type-aux (v disjuncts)
 	     (if (or (member v '(NUMBER IDENTIFIER STRING))
 		     (assoc v *lex-cats*))
-		 (adjoin v disjuncts) 
+		 (adjoin v disjuncts)
 	       (let ((zb-rule (assoc v *zb-rules*))
 		     (types disjuncts))
 		 (unless zb-rule
@@ -893,8 +893,8 @@
       disj
     (cons type (delete-if #'(lambda (a) (is-subtype-of a type))
 			  disj))))
-					   
-  
+
+
 (defun infer-type-disj-of-expr (x)
   (typecase x
     (number '(number))
@@ -963,7 +963,7 @@
 					   (when found
 					     (setf alist (delete p alist))
 					     p)))
-				     (cdr alist)) 
+				     (cdr alist))
 				    :initial-value pair1)))
 		 (cons set1
 		       (partition-set-aux (cdr alist)))))))
@@ -1001,7 +1001,7 @@
   (dolist (item set)
     (let* ((key (funcall selection-fn item))
 	   (found-association (assoc key alist :test #'eql)))
-      (if found-association 
+      (if found-association
 	  (nconc (cdr found-association) (list item))
 	(push (cons key (list item)) alist))))
   (dolist (pair alist)

@@ -6,7 +6,7 @@
 ; Modified:     Thu Mar  7 13:13:40 1996 (Joachim H. Laubsch)
 ; Language:     CL
 ; Package:      CL-USER
-; Status:       Experimental (Do Not Distribute) 
+; Status:       Experimental (Do Not Distribute)
 ; RCS $Header: $
 ;
 ; (c) Copyright 1992, Hewlett-Packard Company
@@ -19,7 +19,7 @@
   (defpackage "USER" (:nicknames "COMMON-LISP-USER" "CL-USER")))
 
 (in-package "CL-USER")
-
+(push 'CLISP *features*)
 #-LUCID
 (declaim (special *ZEBU-directory* *ZEBU-binary-directory*))
 #+LUCID
@@ -27,12 +27,13 @@
 
 ;; edit the following form for your Lisp, and the directory where you keep Zebu
 (defparameter *ZEBU-directory*
-  (make-pathname 
+  (make-pathname
    :directory
    (pathname-directory
     #+CLISP   *load-truename*
-    #-ALLEGRO #+MCL (truename *loading-file-source-file*) 
-    #-ALLEGRO #-MCL *load-pathname*
+    #-ALLEGRO #+MCL (truename *loading-file-source-file*)
+    ;;;#-ALLEGRO #-MCL *load-pathname*
+    #+sbcl *default-pathname-defaults*
     #+ALLEGRO (merge-pathnames *load-pathname*
 			       *default-pathname-defaults*)))
   )
@@ -63,28 +64,70 @@
 #+(and WINDOWS ACL3.0)
 (create-directory *ZEBU-binary-directory*)
 
-#+(or MCL Allegro CLISP)
-(declaim (special *load-source-pathname-types* *load-binary-pathname-types*))
+;; #+(or MCL Allegro CLISP)
+;; (declaim (special *load-source-pathname-types* *load-binary-pathname-types*))
 
-#+(or MCL Allegro CLISP)
-(setq *load-source-pathname-types* '("lisp" NIL))
-#+(and WINDOWS ACL3.0)
-(defvar *load-source-pathname-types* '("lsp" NIL))
+(defparameter *load-source-pathname-types* '("lisp" NIL))
 
-#+(or MCL Allegro)
-(setq *load-binary-pathname-types* '("fasl"))
-#+(and :SUN :LUCID)
-(setq *load-binary-pathname-types* '("sbin"))
-#+CLISP
-(setq *load-binary-pathname-types* '("fas"))
-#+(and WINDOWS ACL3.0)
-(defvar *load-binary-pathname-types* '("fsl"))
+;; #+(and WINDOWS ACL3.0)
+;; (defvar *load-source-pathname-types* '("lsp" NIL))
+
+;; #+(or MCL Allegro)
+;; (setq *load-binary-pathname-types* '("fasl"))
+
+;; #+(and :SUN :LUCID)
+;; (setq *load-binary-pathname-types* '("sbin"))
+
+;; #+CLISP
+;; (setq *load-binary-pathname-types* '("fasl"))
+
+(defparameter *load-binary-pathname-types* '("fasl"))
+
+;; #+(and WINDOWS ACL3.0)
+;; (defvar *load-binary-pathname-types* '("fsl"))
 
 (let ((*default-pathname-defaults*
        (merge-pathnames
 	*ZEBU-directory*
 	(make-pathname :type (first *load-source-pathname-types*)))))
   (load (merge-pathnames "zebu-package")))
+
+(in-package :zebu)
+(defvar *NULL-Grammar*)
+(defvar *zebu-version*)
+
+(defvar *generate-domain* t
+  "if true while zebu compiling a grammar, generate the hierarchy
+otherwise the domain-hierarchy is written by the user.")
+
+(defvar *warn-conflicts* nil)
+
+(defun zebu-compile-file (grammar-file
+			  &key (grammar *null-grammar*)
+			  output-file
+			  verbose
+			  (compile-domain t))
+  "compiles the lalr(1) grammar in file grammar-file."
+  (assert (probe-file (setq grammar-file
+                        (merge-pathnames grammar-file
+                                         (merge-pathnames
+					  (make-pathname :type "zb")))))
+	  (grammar-file)
+	  "cannot find grammar file: ~a" grammar-file)
+  (setq output-file
+	(let ((tab (make-pathname :type "tab")))
+          (if output-file
+	      (merge-pathnames (pathname output-file) tab)
+            (merge-pathnames tab grammar-file))))
+  (when (probe-file output-file) (delete-file output-file))
+  (format t "~%; zebu compiling (version ~a)~%; ~s to ~s~%"
+	  *zebu-version* grammar-file output-file)
+  (let ((*warn-conflicts* verbose))
+    (compile-lalr1-grammar grammar-file
+			   :output-file output-file
+			   :grammar grammar
+			   :verbose verbose
+			   :compile-domain compile-domain)))
 
 (let ((source-path (merge-pathnames
 		    *ZEBU-directory*
@@ -97,6 +140,11 @@
       (*compile-verbose* t)
       (*load-verbose* t)
       (load-before-compile '()))
+  ;; (proclaim (ftype (function (t
+  ;; 			     &key (grammar t)
+  ;; 			     (output-file t)
+  ;; 			     (verbose t)
+  ;; 			     (compile-domain t)) t)) zb:zebu-compile-file)
   (flet ((do-post-poned-load ()
 	   (dolist (file-path (nreverse load-before-compile))
 	     (load (merge-pathnames file-path binary-path)))
@@ -182,7 +230,7 @@
 			  (idate (if (probe-file ifile)
 				     (file-write-date ifile)
 				   (error "File not found ~a" ifile)))
-			  zb:*generate-domain*)
+			  *generate-domain*)
 		     (when (or (null odate) (> idate odate))
 		       (do-post-poned-load)
 		       (ZB:zebu-compile-file ifile :output-file ofile)))))))))

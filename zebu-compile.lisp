@@ -6,7 +6,7 @@
 ; Modified:     Tue Aug  2 16:20:04 1994 (Joachim H. Laubsch)
 ; Language:     CL
 ; Package:      ZEBU
-; Status:       Experimental (Do Not Distribute) 
+; Status:       Experimental (Do Not Distribute)
 ; RCS $Header: $
 ;
 ; (c) Copyright 1990, Hewlett-Packard Company
@@ -21,44 +21,18 @@
 (in-package "ZEBU")
 
 ;; whether warnings about action-conflicts are printed at compile time
-(defvar *warn-conflicts* nil)
 (defvar *compiler-grammar* *null-grammar*
   "The grammar that the Zebu Compiler uses when reading a grammar.
 By default this is the Null-Grammar.")
 
-(defun zebu-compile-file (grammar-file
-			  &key (grammar *null-grammar*)
-			  output-file
-			  verbose
-			  (compile-domain t))
-  "Compiles the LALR(1) grammar in file GRAMMAR-FILE."
-  (assert (probe-file (setq grammar-file
-                        (merge-pathnames grammar-file
-                                         (merge-pathnames
-					  (make-pathname :type "zb")))))
-	  (grammar-file)
-	  "Cannot find grammar file: ~A" grammar-file)
-  (setq output-file
-	(let ((tab (make-pathname :type "tab")))
-          (if output-file    
-	      (merge-pathnames (pathname output-file) tab)
-            (merge-pathnames tab grammar-file))))
-  (when (probe-file output-file) (delete-file output-file))
-  (format t "~%; Zebu Compiling (Version ~A)~%; ~S to ~S~%"
-	  *zebu-version* grammar-file output-file)
-  (let ((*warn-conflicts* verbose))
-    (compile-lalr1-grammar grammar-file
-			   :output-file output-file
-			   :grammar grammar
-			   :verbose verbose
-			   :compile-domain compile-domain)))
+
 
 
 ;----------------------------------------------------------------------------;
 ; compile-from-command-line
 ;--------------------------
 ; call zebu-compile-file with a command-line-argument
-; 
+;
 #+LUCID
 (defun compile-from-command-line ()
   (let ((*default-pathname-defaults*

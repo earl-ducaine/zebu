@@ -6,7 +6,7 @@
 ; Modified:     Thu Dec 21 16:36:57 1995 (Joachim H. Laubsch)
 ; Language:     CL
 ; Package:      ZEBU
-; Status:       Experimental (Do Not Distribute) 
+; Status:       Experimental (Do Not Distribute)
 ; RCS $Header: $
 ;
 ; (c) Copyright 1990, Hewlett-Packard Company
@@ -26,7 +26,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; The Version is determined at compile-time from a file named "Version"
 
-(defconstant *zebu-version*
+(defparameter *zebu-version*
   #.(let ((file (make-pathname
 		 :name "Version"
 		 :type nil
@@ -35,7 +35,7 @@
 	(with-open-file (s file :direction :input)
 	  (read-line s)))))
 
-#-LUCID (declaim (special *load-source-pathname-types* 
+#-LUCID (declaim (special *load-source-pathname-types*
                           *load-binary-pathname-types*))
 #+(or MCL Allegro CLISP)
 (setq *load-source-pathname-types* '("lisp" NIL)
@@ -48,12 +48,8 @@
 ;;          Global Variables (shared by runtime system and compiler)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#-LUCID 
+#-LUCID
 (defvar *KEYWORD-PACKAGE* (find-package "KEYWORD"))
-
-(defvar *generate-domain* t
-  "If true while Zebu compiling a grammar, generate the hierarchy
-otherwise the domain-hierarchy is written by the user.")
 
 (defvar *ZEBU-PACKAGE* (find-package "ZEBU"))
 
@@ -202,7 +198,7 @@ To use the meta grammar use: :GRAMMAR \"zebu-mg\" in options list!")
 ; prepare-domain
 ;---------------
 ; convert a domain D (as read from a grammar file) into the tree representation
-; 
+;
 (defun prepare-domain (domain)
   (clrhash *domain-HT*)
   (let* ((top (new-domain-node ':TOP nil nil)))
@@ -249,7 +245,7 @@ To use the meta grammar use: :GRAMMAR \"zebu-mg\" in options list!")
 (defun def-kb-domain-type (type super slots)
   (let*  ((super-nd (or (gethash super *domain-HT*)
 			(new-domain-node
-			 super (gethash ':top *domain-HT*) '())))	
+			 super (gethash ':top *domain-HT*) '())))
 	  (type-nd (or (gethash type *domain-HT*)
 		       (new-domain-node type super-nd slots))))
     (pushnew type-nd (type-tree-node--subtypes super-nd))

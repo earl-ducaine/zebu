@@ -6,7 +6,7 @@
 ; Modified:     Wed Oct 12 10:55:07 1994 (Joachim H. Laubsch)
 ; Language:     CL
 ; Package:      ZEBU
-; Status:       Experimental (Do Not Distribute) 
+; Status:       Experimental (Do Not Distribute)
 ; RCS $Header: $
 ;
 ; (c) Copyright 1990, Hewlett-Packard Company
@@ -23,9 +23,9 @@
 ;  lr-parse takes a third argument, a grammar
 ;  READ-PARSER and LIST-PARSER take a :grammar keyword argument, defaulting to
 ;  *current-grammar*
-;  in order to use several grammars we need several 
+;  in order to use several grammars we need several
 ;    *IDENTIFIER-CONTINUE-CHARS*, *IDENTIFIER-START-CHARS*
-;    
+;
 ;  1-Mar-91 (Joachim H. Laubsch)
 ;  did monitoring, found that 75% of the time is in the lexer.
 ;  rewrote ZEBU::RECOGNIZE-TOKEN to use a hashtable of terminal-tokens
@@ -36,10 +36,10 @@
 (in-package "ZEBU")
 (provide "zebu-loader")
 
-;;; The following data structures are loaded from a parse table file by the 
+;;; The following data structures are loaded from a parse table file by the
 ;;; function which follows.
 ;;;
-;;; lexicon is a vector of strings or lisp symbols , indexed by the 
+;;; lexicon is a vector of strings or lisp symbols , indexed by the
 ;;; "grammar symbol indices",  which are the instantiations of
 ;;; the grammar symbols.
 ;;;
@@ -64,20 +64,20 @@
 ;;; goto-table is arranged similar to action-table but has two element
 ;;; lists instead of three.  The second element of each list are the
 ;;; index of the state to goto.
-;;; 
+;;;
 ;;; end-symbol-index holds the index of the end symbol.
 ;;;
 ;;; terminal-alist associates terminal symbol instantiations with
 ;;; their indices.
 ;;;
 ;;; client-lambdas are a vector of procedures, indexed by production index,
-;;; which correspond to productions in the grammar.  The client lambdas are 
+;;; which correspond to productions in the grammar.  The client lambdas are
 ;;; what the parser calls to do syntax directed something by side effect.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                             Zebu Grammar Struct
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; helps define the function that computes whether a character can continue 
+;; helps define the function that computes whether a character can continue
 ;; a symbol
 
 (defvar *identifier-continue-chars*
@@ -92,7 +92,7 @@
 ;---------------------------------------
 ;; An NLL-constant can now be a string or a symbol. A string is surrounded
 ;; by double-quotes (#\"), as in: P(arg1: \"|Jon Doe's Deli|\")
-;; A symbol is surrounded by single-quotes (#\'), as in: 
+;; A symbol is surrounded by single-quotes (#\'), as in:
 ;;     P(arg1: 'Jon Doe')
 ;; or  P(arg1: '|Jon Doe|')
 ;; By default, the single-quotes may be omitted at parsing in case the
@@ -117,11 +117,11 @@ looking for the next token (default false).")
 
 (defvar *disallow-packages* nil
   "If false, Zebu parses identifiers as symbols possibly qualified by a package")
-    
+
 ;----------------------------------------------------------------------------;
 ; grammar
 ;--------
-; 
+;
 (defstruct (grammar (:print-function print-grammar))
   name
   lexicon
@@ -169,7 +169,7 @@ looking for the next token (default false).")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                                Null Grammar
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defvar *NULL-Grammar* (make-grammar :name "null-grammar"))
+(defparameter *NULL-Grammar* (make-grammar :name "null-grammar"))
 
 (defun print-grammar (item stream level)
   (declare (ignore level))
@@ -212,7 +212,7 @@ looking for the next token (default false).")
 	       (list (cons index (symbol-function terminal-token))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;                               Debugging 
+;;                               Debugging
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defvar *grammar-debug* nil
@@ -276,9 +276,9 @@ looking for the next token (default false).")
 		      (dolist (type (append *load-binary-pathname-types*
 					    *load-source-pathname-types*))
 			(dolist (domain-path (list path (grammar-file g)))
-			  (let ((domain-file 
+			  (let ((domain-file
 				 (merge-pathnames
-				  (make-pathname 
+				  (make-pathname
 				   :name grammar-domain-file-name
 				   :type type)
 				  domain-path)))
@@ -301,11 +301,11 @@ looking for the next token (default false).")
 	    (if old-grammar
 		(setf (cdr old-grammar) g)
 	      (setf *all-grammars* (acons (grammar-name g) g *all-grammars*))))
-	
+
 	  ;; 5: read grammar-action-table
-	  (setf (grammar-action-table g) 
+	  (setf (grammar-action-table g)
 		(vectorize-vector-of-lists (read port)))
-	
+
 	  ;; 6: read grammar-goto-table
 	  (setf (grammar-goto-table g) (vectorize-vector-of-lists (read port))
 		;; 7: read grammar-lr-parser-start-state-index
@@ -343,7 +343,7 @@ looking for the next token (default false).")
 	  ;; initial string are sorted by decreasing length
 	  ;; i.e. if "?" and "?u?" are both terminals, then "?u?"
 	  ;; should be found first.
-	  ;; This can simply be achieved by sorting according to 
+	  ;; This can simply be achieved by sorting according to
 	  ;; ascending key length.
 	  (dotimes (i (length (the simple-vector terminal-indices)))
 	    (let* ((index (svref terminal-indices i))
@@ -418,7 +418,7 @@ looking for the next token (default false).")
 
 (defun vectorize-vector-of-lists (V  &aux alist)
   (declare (simple-vector V) (dynamic-extent alist))
-  (dotimes (i (length V) V) 
+  (dotimes (i (length V) V)
     (let* ((sublist (svref V i))
 	   (pair (assoc sublist alist :test #'equal)))
       (if pair
@@ -435,7 +435,7 @@ looking for the next token (default false).")
 ;    Zebu-Parser ex1.tab
 ; Zebu-Parser <comiled-grammar> -l <file to load before grammar>
 ;             -e "<form to be evaluated>"
-;             -quit 
+;             -quit
 #+LUCID
 (defun load-from-command-line ()
   (let ((*default-pathname-defaults*
@@ -474,7 +474,7 @@ looking for the next token (default false).")
 ; zebu-load-top
 ;--------------
 ; interactive loader invocation
-; 
+;
 (defun zebu-load-top ()
   (format t "~&Enter the name of a Zebu .tab file to load: ")
   (let ((ifile (read-line t)))

@@ -6,7 +6,7 @@
 ; Modified:     Thu Mar  7 10:53:14 1996 (Joachim H. Laubsch)
 ; Language:     CL
 ; Package:      ZEBU
-; Status:       Experimental (Do Not Distribute) 
+; Status:       Experimental (Do Not Distribute)
 ; RCS $Header: $
 ;
 ; (c) Copyright 1990, Hewlett-Packard Company
@@ -87,11 +87,11 @@ The file consists of:
     If parsing with the META-Grammar
      one or more rules using the syntax of the Meta-grammar
      The start symbol of the grammar will be the lhs of the first
-     production encountered.  
+     production encountered.
 
 The symbol AUGMENTED-START is reserved and will automatically appear in
 a production deriving the start symbol.
-The symbol THE-EMPTY-STRING is also reserved. 
+The symbol THE-EMPTY-STRING is also reserved.
 
 Use load-grammar to internalize a grammar in the above syntax.
  *productions* holds a list of all the productions.
@@ -126,7 +126,7 @@ property.
           *identifier-continue-chars*
           *identifier-start-chars*
           *null-grammar*
-          *compiler-grammar* 
+          *compiler-grammar*
           *domain-type-hierarchy*
           *domain-types*
           *domain-structs*
@@ -167,7 +167,7 @@ property.
 ;----------------------------------------------------------------------------;
 ; g-symbol-intern
 ;----------------
-; This is sort of like interning.  returns a g-symbol. 
+; This is sort of like interning.  returns a g-symbol.
 ; if (equal (string x) (string y)) the g-symbols are eq
 
 (defun g-symbol-intern (string-or-symbol)
@@ -194,7 +194,7 @@ property.
 	(rhs-symbols (mapcar #'g-symbol-intern rhs)))
     (unless *start-symbol*
       (setq *start-symbol* lhs-symbol)
-      (format t "~%Start symbols is: ~A~%" 
+      (format t "~%Start symbols is: ~A~%"
 	      (g-symbol-name *start-symbol*))
       (process-production 'AUGMENTED-START (list lhs) t))
     (let ((production
@@ -236,7 +236,7 @@ property.
       (do ((prods (zb-rule--productions zb-rule) (cdr prods)))
 	  ((null prods))
 	(let* ((production-rhs (car prods))
-	       (syntax (production-rhs--syntax production-rhs))) 
+	       (syntax (production-rhs--syntax production-rhs)))
 	  (when (member syntax (rest prods)
 			:test #'equal :key #'production-rhs--syntax)
 	    (warn "Multiply defined rhs of rule for ~S: ~S" lhs syntax))
@@ -270,7 +270,7 @@ property.
 	 (lexical-categories (mapcar #'(lambda (c)
 					 (symbol-name (car c)))
 				     *lex-cats*))
-	 (rhs-non-terminals 
+	 (rhs-non-terminals
 	  (set-difference non-terminals
 			  (union *open-categories* lexical-categories)
 			  :test #'string-equal :key #'string))
@@ -285,7 +285,7 @@ property.
 			  :test #'string= :key #'string))
 	 (overused-lex-cats
 	  (intersection lhs-non-terminals lexical-categories
-			:test #'string= :key #'string)))	   
+			:test #'string= :key #'string)))
     (when undefined-non-terminals
       (warn "The following non-terminals had no definition:~% ~{~a ~}"
 	    undefined-non-terminals))
@@ -315,9 +315,9 @@ property.
 ;;  ::= ()
 ;;  ::= <x> <X>*)
 ;; + case will expand:
-;; (defrule <X>+ 
+;; (defrule <X>+
 ;;  ::= <x> :build (make-kb-sequence :first <x>)
-;;  ::= <x> <Sep> <x>+ 
+;;  ::= <x> <Sep> <x>+
 ;;      :build (make-kb-sequence :first <x> :rest <x>+))
 (defun expand-Kleene-constituent (production-rhs)
   (flet ((new-kb-seq (pairs)
@@ -344,9 +344,9 @@ property.
 	  (let ((semantics (production-rhs--semantics production-rhs)))
 	    (when (and (feat-term-p semantics)
 		       (not (default-separator? Kleene-Sep)))
-	      (feat-term-substitute 
+	      (feat-term-substitute
 	       Kleene+ (decode-kleene-name Kleene+) semantics)))
-	  ;; (break "constituent: ~S" constituent) 
+	  ;; (break "constituent: ~S" constituent)
 	  (unless (find Kleene+ *Kleene+-rules* :key #'zb-rule--name)
 	    ;; only if a rule of that name has not been defined yet!
 	    (let ((KR-sem (new-kb-seq `((first ,Kleene-const)
@@ -382,7 +382,7 @@ property.
 				 `(,Kleene-Sep ,Kleene-const ,X*-rest)
 				 :-semantics KR-sem))))))
 		(progn
-		  ;; (break "constituent: ~S" constituent) 
+		  ;; (break "constituent: ~S" constituent)
 		  (memo (make-zb-rule
 			 :-name Kleene+
 			 :-productions
@@ -428,7 +428,7 @@ property.
 	constituent
       (let ((p (position-if #'(lambda (c) (char= c #\.)) n
 			    :from-end t)))
-	(if (and p 
+	(if (and p
 		 (let ((p+1 (1+ p)))
 		   (and (= p+1 last-char-pos)
 			(digit-char-p (schar n p+1)))))
@@ -444,7 +444,7 @@ property.
 	    (feat-term-substitute new old val))))))
 
 (defun parse-defrule (rule &aux name)
-  (unless (and (consp rule) 
+  (unless (and (consp rule)
 	       (symbolp (car rule))
 	       (string= (string (car rule)) "DEFRULE")
 	       (consp (cdr rule))
@@ -495,7 +495,7 @@ property.
 				  (parse-build :FORM build-args))))
 			(setq rest (cddr rest)))
 		    ;; no :BUILD clause, use IDENTITY fn
-		    (setq action 
+		    (setq action
 			  (if (= (length rhs) 1) 'identity 'identity*))))
 	      (error "Keyword expected in rule ~S at .. ~{~S ~}~% Probably no () around rule's rhs"
 		     name args))
@@ -539,7 +539,7 @@ property.
 		(NULL (if (= 1 (length syntax))
 			  'identity
 			'identity*))
-		((or number string) 
+		((or number string)
 		 `(lambda (&rest args) (declare (ignore args))
 		   ,Feat-Term))
 		(symbol
@@ -550,12 +550,12 @@ property.
 		(Feat-Term (cons-lambda t))
 		(T (error "~A should be a feature term, number, string or constituent!" (msg)))))))))
 
-	  
+
 ;----------------------------------------------------------------------------;
 ; generate-form
 ;--------------
-; 
-; 
+;
+;
 (defun generate-form (type map)
   `(,(intern (concatenate 'string "MAKE-" (symbol-name type))
       (symbol-package type))
@@ -595,8 +595,8 @@ property.
     (when (consp tree)
 	(dolist (n tree)
 	   (when (search-list atom n) (return t))))))
-      
-	
+
+
 #||
 (apply #'parse-build '( "(" Formula ")" ) '(:form (progn Formula)))
 (apply #'parse-build '(Identifier) '(:type Propositional-variable
@@ -605,13 +605,13 @@ property.
        '(:type Boolean-And
 	 :map ((Formula.1 . :-rand1)
 	       (Formula.2 . :-rand2))))
-||#  
+||#
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                           Top level load function
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; LOAD-GRAMMAR loads a Zebu source grammar and prepares it for 
+;;; LOAD-GRAMMAR loads a Zebu source grammar and prepares it for
 ;;; compilation
 ;;; Internalize a grammar in the lisp syntax described above.
 ;;; Set up data structures as described above.
@@ -647,7 +647,7 @@ property.
 		      (read grammar-stream) g-file t))))
 	   (setq *lex-cats* (get-grammar-options-key ':lex-cats))
 	   (if (eq *compiler-grammar* *NULL-Grammar*)
-	       (let ((eof (list nil)))  
+	       (let ((eof (list nil)))
 		 (pre-process-rules
 		  #'(lambda ()
 		      (loop (let ((rule (read grammar-stream nil eof)))
@@ -688,7 +688,7 @@ property.
 ;;;------------------------------------------------------------------------;
 ;; generate code for domain, printers, and regular expressions
 ;; dump it onto the domain-file
-;; it may be the case that none of the above are necessary, in which 
+;; it may be the case that none of the above are necessary, in which
 ;; case no domain-file is generated
 ;; the domain-file is specified as:
 ;;   name: from grammar-option :DOMAIN-FILE
@@ -696,11 +696,11 @@ property.
 ;;   directory: same as grammar-file
 ;;              if not directory in grammar-file from
 ;;                      *default-pathname-defaults*
-;; if such a file exists already, a warning is given and the old file 
+;; if such a file exists already, a warning is given and the old file
 ;; is renamed.
 
 (defun dump-domain-file (grammar-file verbose)
-  (let* ((domain-file 
+  (let* ((domain-file
 	  (merge-pathnames
 	   (or (get-grammar-options-key ':DOMAIN-FILE)
 	       (make-pathname
@@ -710,24 +710,28 @@ property.
 	    (merge-pathnames (make-pathname
 			      :type (first *load-source-pathname-types*))
 			     grammar-file)
-	    *default-pathname-defaults*)))		 
+	    *default-pathname-defaults*)))
 	 (*print-array* t)		; bit-vectors of regex code
 	 *print-level* *print-length* *print-circle*
 	 written?)
-    #-MCL (when (probe-file domain-file)
-	    (warn "Renaming existing domain file ~a" domain-file))
+    (when (probe-file domain-file)
+      (warn "Renaming existing domain file ~a" domain-file))
     (with-open-file (port domain-file
 			  :if-does-not-exist :create
 			  :if-exists #-MCL :rename #+MCL :supersede
 			  :direction :output)
-      (format port ";;; This file was generated by Zebu (Version ~a)~%~%(IN-PACKAGE ~S)~%(REQUIRE \"zebu-package\")~%(USE-PACKAGE \"ZEBU\")~%"
+      ;; (format port ";;; This file was generated by Zebu (Version ~a)~%~%(IN-PACKAGE ~S)~%(REQUIRE \"zebu-package\")~%(USE-PACKAGE \"ZEBU\")~%"
+      ;; 	      zb:*zebu-version* (package-name *package*))
+      (format port (concatenate
+		    'string
+		    ";;; This file was generated by Zebu (Version ~a)~%~%"
+		    "(IN-PACKAGE ~S)~%"
+		    "(USE-PACKAGE \"ZEBU\")~%")
 	      zb:*zebu-version* (package-name *package*))
-
-      (when *generate-domain* 
+      (when *generate-domain*
 	(format t "~%Generating domain source code onto file: ~a"
 		domain-file)
 	(setq written? (generate-domain-file domain-file port)))
-
       ;; Write actions onto domain file
       (when verbose
 	(format t "~%Writing actions of rules to ~a" domain-file)
@@ -762,7 +766,7 @@ property.
 	(nconc *grammar-options* (list ':DOMAIN-FILE
 				       (namestring domain-file)))
 	domain-file))))
-    
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                           End of zebu-loadgram.lisp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

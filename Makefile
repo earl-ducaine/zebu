@@ -6,7 +6,7 @@ SHELL = /bin/sh
 CLPATH = $(LISP)
 
 # Common Lisp development environment
-CLDE = lucid-de
+CLDE = /usr/bin/sbcl
 
 # Compiler
 Lisp-compiler = $(CLPATH)/$(CLDE)
@@ -16,8 +16,7 @@ Lisp-ae = $(CLPATH)/lucid-ae
 
 LATEX = latex
 
-cl-compile = $(CLPATH)/$(CLDE) -n \
-	-l COMPILE-ZEBU.lisp -quit -f 
+cl-compile = $(CLPATH)/$(CLDE) --load COMPILE-ZEBU.lisp -quit -f
 
 # this works in GNU make, and not in HPUX
 # in HPUX use: bin = `./machine`bin
@@ -120,17 +119,17 @@ distclean:
 	chmod 777 ./test
 	rm -rf ./test/*.tab
 	@echo Deleting binary files in directory test/binary
-	rm -f ./test/binary/*.$(bin) 
+	rm -f ./test/binary/*.$(bin)
 	@echo Deleting binary files in directory test/binary
 	rm -f ./binary/*
 
 .PHONY: clean
 clean:
-	@echo Deleting domain files 
+	@echo Deleting domain files
 	find .  \( -name '[0-9]*-dom*' -o -name '*~' \) -type f -print -exec rm {} \;
 	find ./test  \( -name '[0-9]*.lisp' -o -name '*-dom*.lisp' -o -name '*~' \) -type f -print -exec rm {} \;
 
-TAGS:   $(lisp-obj) 
+TAGS:   $(lisp-obj)
 	make clean; etags -o TAGS *.lisp
 
 tar:

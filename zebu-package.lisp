@@ -6,7 +6,7 @@
 ; Modified:     Thu Mar  7 09:13:58 1996 (Joachim H. Laubsch)
 ; Language:     CL
 ; Package:      CL-USER
-; Status:       Experimental (Do Not Distribute) 
+; Status:       Experimental (Do Not Distribute)
 ; RCS $Header: $
 ;
 ; (c) Copyright 1991, Hewlett-Packard Company
@@ -15,39 +15,38 @@
 ; RCS $Log: $
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(in-package "CL-USER")
-(provide "zebu-package")
+(in-package :cl-user)
+(provide :zebu-package)
 
-#+LUCID					; while not up tp CLtL2
-(eval-when (compile load eval)
-  (defmacro LCL::DECLAIM (decl-spec) `(proclaim ',decl-spec)))
+;; #+LUCID					; while not up tp CLtL2
+;; (eval-when (compile load eval)
+;;   (defmacro LCL::DECLAIM (decl-spec) `(proclaim ',decl-spec)))
 
-#+LUCID
-(defpackage "PSGRAPH"
-    (:use "LUCID-COMMON-LISP"))
+;; #+LUCID
+;; (defpackage "PSGRAPH"
+;;     (:use "LUCID-COMMON-LISP"))
 
-#-LUCID
-(defpackage "PSGRAPH"
-    (:use "COMMON-LISP"))
 
-(defpackage "ZEBU"
-    (:nicknames "ZB")
-    #+LUCID (:use "LISP" "LUCID-COMMON-LISP")
-    #+LUCID (:import-from "SYSTEM" "*KEYWORD-PACKAGE*")
-    #+LUCID (:import-from "LCL" "DECLAIM")
-    (:import-from "PSGRAPH" PSGRAPH::PSGRAPH)
-    #+MCL   (:use "COMMON-LISP" "CCL")
-    #+KCL   (:use "LISP")
-    #+ALLEGRO (:use "COMMON-LISP" "EXCL")
-    
-    (:import-from "CL-USER" CL-USER::*ZEBU-DIRECTORY*
-		  CL-USER::*ZEBU-binary-directory*)
+(defpackage :psgraph
+    (:use :common-lisp))
+
+(defpackage :zebu
+    (:nicknames :zb)
+;;    #+LUCID (:use "LISP" "LUCID-COMMON-LISP")
+;;    #+LUCID (:import-from "SYSTEM" "*KEYWORD-PACKAGE*")
+;;   #+LUCID (:import-from "LCL" "DECLAIM")
+    ;;(:import-from :psgraph psgraph::psgraph)
+;;    #+MCL   (:use "COMMON-LISP" "CCL")
+;;    #+KCL   (:use "LISP")
+;;    #+ALLEGRO (:use "COMMON-LISP" "EXCL")
+
+    (:use cl)
     (:export "*COMMENT-BRACKETS*" "*COMMENT-START*" "*PRESERVE-CASE*"
 	     "*CASE-SENSITIVE*"
 	     "*DISALLOW-PACKAGES*" "*STRING-DELIMITER*"
 	     "*SYMBOL-DELIMITER*"
 	     "*IDENTIFIER-START-CHARS*" "*IDENTIFIER-CONTINUE-CHARS*"
-	     "*ALLOW-CONFLICTS*" "*WARN-CONFLICTS*" 
+	     "*ALLOW-CONFLICTS*" "*WARN-CONFLICTS*"
 	     "*CURRENT-GRAMMAR*" "*GENERATE-DOMAIN*"
 	     "*ZEBU-VERSION*"
 	     "CATEGORIZE" "END-OF-TOKENS-CATEGORY"
@@ -64,7 +63,7 @@
              "KB-TREE-ATTRIBUTES" "DEFINE-TREE-ATTRIBUTES" "DEF-TREE-ATTRIBUTES"
 	     "PREORDER-TRANSFORM" "POSTORDER-TRANSFORM"
 	     "KIDS" "FOR-EACH-KID" "FOR-EACH-KID!"
-	     "FOR-EACH-DESCENDANT" 
+	     "FOR-EACH-DESCENDANT"
 	     "KB-COPY" "KB-EQUAL" "KB-COMPARE"
 	     "LIST-PARSER" "LR-PARSE" "PRINT-ACTIONS" "READ-PARSER"
 	     "COMPILE-FROM-COMMAND-LINE"
@@ -73,26 +72,4 @@
 	     "NUMBER" "STRING" "IDENTIFIER"
 	     "SHOW-KB-HIERARCHY"
 	     "ZEBU" "ZEBU-COMPILER" "ZEBU-COMPILE-FILE" "ZEBU-LOAD-FILE"
-	     "ZEBU-RR" "ZEBU-TOP"
-	     )
-    #-LUCID
-    (:import-from "CL-USER"
-		  CL-USER::*LOAD-SOURCE-PATHNAME-TYPES*
-		  CL-USER::*LOAD-BINARY-PATHNAME-TYPES*))
-
-(in-package "ZB")
-(declaim (special *COMMENT-BRACKETS* *COMMENT-START* *PRESERVE-CASE*
-	          *CASE-SENSITIVE* *DISALLOW-PACKAGES* *STRING-DELIMITER*
-	          *SYMBOL-DELIMITER* *IDENTIFIER-START-CHARS*
-	          *IDENTIFIER-CONTINUE-CHARS*
-	          *ALLOW-CONFLICTS* *WARN-CONFLICTS*
-	          *CURRENT-GRAMMAR* *GENERATE-DOMAIN*
-	          *ZEBU-DIRECTORY*
-	          ))
-
-#-LUCID
-(declaim (special *LOAD-SOURCE-PATHNAME-TYPES*
-                  *LOAD-BINARY-PATHNAME-TYPES*))
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;                            End of zebu-package.l
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	     "ZEBU-RR" "ZEBU-TOP"))
