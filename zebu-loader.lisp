@@ -223,13 +223,12 @@ looking for the next token (default false).")
 		 x
 	       'nil)))
 
-(eval-when (compile)
-  (setq *grammar-debug* nil))
+;; (eval-when (compile)
+;;   (setq *grammar-debug* nil))
 
-#||
-(eval-when (eval)
-  (setq *grammar-debug* T))
-||#
+
+(defparameter *grammar-debug* t)
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;         Read in a set of parse tables as written by (dump-tables) .
@@ -265,7 +264,6 @@ looking for the next token (default false).")
 		  (check-grammar-options (read port) path nil))))
 	(let* ((g (apply #'make-grammar options))
 	       (terminal-alist-SEQ (grammar-terminal-alist-SEQ g)))
-	  (declare (type grammar g))
 	  (prepare-domain (grammar-domain g))
 	  ;; 1a: load the domain file
 	  (let ((grammar-domain-file (grammar-domain-file g)))
@@ -289,7 +287,6 @@ looking for the next token (default false).")
 			      (return-from find-domain-file
 				(load domain-file)))))))
 		    (warn "No domain file found")))))
-
 	  ;; 2: read grammar-lexicon
 	  (setf (grammar-lexicon g)          (setf lexicon (read port))
 		;; 3: read grammar-terminal-indices
@@ -301,11 +298,9 @@ looking for the next token (default false).")
 	    (if old-grammar
 		(setf (cdr old-grammar) g)
 	      (setf *all-grammars* (acons (grammar-name g) g *all-grammars*))))
-
 	  ;; 5: read grammar-action-table
 	  (setf (grammar-action-table g)
 		(vectorize-vector-of-lists (read port)))
-
 	  ;; 6: read grammar-goto-table
 	  (setf (grammar-goto-table g) (vectorize-vector-of-lists (read port))
 		;; 7: read grammar-lr-parser-start-state-index
@@ -314,19 +309,16 @@ looking for the next token (default false).")
 		(grammar-end-symbol-index g) (read port)
 		;; 9: read grammar-client-lambdas
 		(grammar-client-lambdas g) (read-parser-actions port g))
-
 	  ;; IDENTIFIER-START-CHARS"
 	  (let ((identifier-start-chars-V
 		 (grammar-identifier-start-chars-V g))
 		(identifier-start-chars (grammar-identifier-start-chars g)))
 	    (dotimes (i (length identifier-start-chars))
 	      (let ((c (schar identifier-start-chars i)))
-		(declare (character c))
 		(setf (sbit identifier-start-chars-V (char-code c))
 		      1)
 		(when (digit-char-p c)
 		  (setf (grammar-id-allows-start-digit g) t)))))
-
 	  ;; IDENTIFIER-CONTINUE-CHARS"
 	  (let ((identifier-continue-chars-V
 		 (grammar-identifier-continue-chars-V g))
@@ -338,7 +330,6 @@ looking for the next token (default false).")
 			   (the character
 				(schar identifier-continue-chars i))))
 		    1)))
-
 	  ;; sort the terminal-alist so that terminals with the same
 	  ;; initial string are sorted by decreasing length
 	  ;; i.e. if "?" and "?u?" are both terminals, then "?u?"
@@ -348,12 +339,10 @@ looking for the next token (default false).")
 	  (dotimes (i (length (the simple-vector terminal-indices)))
 	    (let* ((index (svref terminal-indices i))
 		   (terminal-token (svref lexicon index)))
-	      (declare (string terminal-token))
 	      (typecase terminal-token
 		(string
 		 (let ((char1-code
 			(char-code (let ((c (schar terminal-token 0)))
-				    (declare (character c))
 				    (if (grammar-case-sensitive g)
 					c
 				      (char-downcase c)))))
@@ -364,13 +353,12 @@ looking for the next token (default false).")
 		     (setf (elt terminal-alist-SEQ char1-code)
 			   (if bucket
 			       (sort (cons token-association bucket)
-				     #'(lambda (a b) (declare (string a b))
+				     #'(lambda (a b)
 					       (> (length a) (length b)))
 				     :key #'car)
 			     (list token-association))))))
 		(symbol
 		 (let ((terminal-token-name (symbol-name terminal-token)))
-		   (declare (string terminal-token-name))
 		   (cond ((string= terminal-token-name "IDENTIFIER")
 			  (setf (grammar-identifier-index g) index))
 			 ((string= terminal-token-name "STRING")

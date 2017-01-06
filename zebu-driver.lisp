@@ -653,7 +653,6 @@
 		      error-fn
 		      (unrecognized-token-error
 		       "<end of string>" 0 actionv grammar)))))
-
 	       ;; is an IDENTIFIER also expected
 	       (setf find-id? (and identifier-index
 				   (find identifier-index actionv
@@ -712,7 +711,6 @@
 			    (format t "~%LexToken: ~s : ~s ~s < ~s" instance (car lex-cat-pair) new-pos string-ln))
 			   (return-from next-token
 			     (values instance lex-cat))))))))
-
 	       ;; read symbol, string, or number
 	       ;; foo : symbol, 'foo' : symbol, "foo" : string, 3/4 : number
 	       ;; recognize a number: <digit>* [ "." <digit>+ ]
@@ -779,7 +777,6 @@
 					     :key #'car)))
 	       (when (or find-id? find-string?)
 		 (let ((char (schar string pos)) c)
-		   (declare (character char c))
 		   (flet
 		       ((parse-delimited-id (delimiter symb?)
 			  (block parse-delimited-id
@@ -819,7 +816,6 @@
 			  (parse-delimited-id string-delimiter nil)
 			  (return-from next-token
 			    (values token string-index))))
-
 		   ;; Does char start an identifier?
 		   (unless find-id? (funcall error-fn (unrecognized-token-error
 						       string pos actionv grammar)))
