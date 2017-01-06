@@ -18,6 +18,17 @@
 ;;; and should be mailed to laubsch@hplabs.hpl.hp.com
 ;;; ***********************************************************
 
+
+** NOTE **
+
+Zebu is now compatable with ASDF and can be loaded in the conventional
+way.  Practically all the documentation is several decades old.
+Documentation describing installation or compiling is hopelessly out
+of date.  But documentation describing how to actually use the
+software is more or less current and most things work.
+
+*********
+
 Zebu is a kind of YACC, and was originally implemented in Scheme by
 William M. Wells III.  It generates an LALR(1) parsing table. To parse
 a string with a grammar, only this table and a driver need to be
